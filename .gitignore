@@ -4,3 +4,12 @@ output
 _build-*/**
 *_chunkah_*
 *_rpm-ostree_*
+
+# JetBrains IDEs
+.idea/
+cmake-build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json

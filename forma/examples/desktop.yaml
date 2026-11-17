@@ -1,0 +1,8 @@
+system:
+  hostname: forma-pc
+
+desktop:
+  theme: dark
+
+gaming:
+  enabled: true

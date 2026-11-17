@@ -324,10 +324,27 @@ _build-bib $target_image $tag $type $config: (_rootful_load_image target_image t
       ${args} \
       "${target_image}:${tag}"
 
+    # Install generated artifacts, preserving previous builds
     mkdir -p output
-    sudo mv -f $BUILDTMP/* output/
-    sudo rmdir $BUILDTMP
-    sudo chown -R $USER:$USER output/
+
+    for artifact in "$BUILDTMP"/*; do
+        [[ -e "$artifact" ]] || continue
+
+        name=$(basename "$artifact")
+        destination="output/$name"
+
+        # Preserve the previous artifact before replacing it
+        if [[ -e "$destination" ]]; then
+            backup="${destination}.backup-$(date +%Y%m%d-%H%M%S)"
+            mv "$destination" "$backup"
+            echo "Previous artifact backed up to: $backup"
+        fi
+
+        sudo mv "$artifact" "$destination"
+        sudo chown -R "$(id -u):$(id -g)" "$destination"
+    done
+
+    sudo rmdir "$BUILDTMP"
 
 # Podman builds the image from the Containerfile and creates a bootable image
 # Parameters:

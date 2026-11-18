@@ -32,6 +32,11 @@ add_library(forma_core STATIC
         src/config_planner.cpp
         src/system_state.cpp
         src/config_diff.cpp
+        src/action_plan.cpp
+        src/action_plan_formatter.cpp
+        src/action_executor.cpp
+        src/memory_backend.cpp
+        src/recovery_executor.cpp
 )
 
 target_include_directories(forma_core PUBLIC
@@ -136,7 +141,7 @@ set_tests_properties(forma_duplicate_keys PROPERTIES
 )
 
 # ------------------------------------------------------------
-# Typed configuration parser tests
+# Configuration parser tests
 # ------------------------------------------------------------
 
 add_executable(forma_config_parser_test
@@ -164,7 +169,7 @@ add_test(
 )
 
 set_tests_properties(forma_plan PROPERTIES
-        PASS_REGULAR_EXPRESSION "Preview only"
+        PASS_REGULAR_EXPRESSION "No changes have been applied"
 )
 
 add_test(
@@ -174,7 +179,7 @@ add_test(
 )
 
 set_tests_properties(forma_partial_config PROPERTIES
-        PASS_REGULAR_EXPRESSION "Theme: \\(unchanged\\)"
+        PASS_REGULAR_EXPRESSION "No changes have been applied"
 )
 
 # ------------------------------------------------------------
@@ -236,7 +241,10 @@ add_test(
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/invalid-syntax.yaml
 )
 
-# Diagnostic formatting and source-location tests
+# ------------------------------------------------------------
+# Configuration diagnostics tests
+# ------------------------------------------------------------
+
 add_executable(forma_config_diagnostics_test
         tests/config_diagnostics_test.cpp
 )
@@ -251,4 +259,201 @@ add_test(
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/invalid-theme.yaml
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/invalid-hostname.yaml
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/invalid-duplicate.yaml
+)
+
+# ------------------------------------------------------------
+# Structured action planning tests
+# ------------------------------------------------------------
+
+add_executable(forma_action_plan_test
+        tests/action_plan_test.cpp
+)
+
+target_link_libraries(forma_action_plan_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_action_plan
+        COMMAND forma_action_plan_test
+)
+
+# ------------------------------------------------------------
+# Simulated action execution tests
+# ------------------------------------------------------------
+
+add_executable(forma_action_executor_test
+        tests/action_executor_test.cpp
+)
+
+target_link_libraries(forma_action_executor_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_action_executor
+        COMMAND forma_action_executor_test
+)
+
+# ------------------------------------------------------------
+# CLI simulation test
+# ------------------------------------------------------------
+
+add_test(
+        NAME forma_simulate
+        COMMAND forma simulate
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/partial.yaml
+)
+
+set_tests_properties(forma_simulate PROPERTIES
+        PASS_REGULAR_EXPRESSION
+        "Simulation only. No system changes were made."
+)
+
+# ------------------------------------------------------------
+# Executor safety tests
+# ------------------------------------------------------------
+
+add_executable(forma_action_executor_safety_test
+        tests/action_executor_safety_test.cpp
+)
+
+target_link_libraries(forma_action_executor_safety_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_action_executor_safety
+        COMMAND forma_action_executor_safety_test
+)
+
+# ------------------------------------------------------------
+# Incomplete action plan tests
+# ------------------------------------------------------------
+
+add_executable(forma_incomplete_plan_test
+        tests/incomplete_plan_test.cpp
+)
+
+target_link_libraries(forma_incomplete_plan_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_incomplete_plan
+        COMMAND forma_incomplete_plan_test
+)
+
+# ------------------------------------------------------------
+# In-memory backend tests
+# ------------------------------------------------------------
+
+add_executable(forma_memory_backend_test
+        tests/memory_backend_test.cpp
+)
+
+target_link_libraries(forma_memory_backend_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_memory_backend
+        COMMAND forma_memory_backend_test
+)
+
+# ------------------------------------------------------------
+# Backend-based executor tests
+# ------------------------------------------------------------
+
+add_executable(forma_backend_executor_test
+        tests/backend_executor_test.cpp
+)
+
+target_link_libraries(forma_backend_executor_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_backend_executor
+        COMMAND forma_backend_executor_test
+)
+
+# ------------------------------------------------------------
+# Backend preflight validation tests
+# ------------------------------------------------------------
+
+add_executable(forma_backend_preflight_test
+        tests/backend_preflight_test.cpp
+)
+
+target_link_libraries(forma_backend_preflight_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_backend_preflight
+        COMMAND forma_backend_preflight_test
+)
+
+# ------------------------------------------------------------
+# Backend failure injection tests
+# ------------------------------------------------------------
+
+add_executable(forma_backend_failure_test
+        tests/backend_failure_test.cpp
+)
+
+target_link_libraries(forma_backend_failure_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_backend_failure
+        COMMAND forma_backend_failure_test
+)
+
+# ------------------------------------------------------------
+# Best-effort rollback tests
+# ------------------------------------------------------------
+
+add_executable(forma_backend_rollback_test
+        tests/backend_rollback_test.cpp
+)
+
+target_link_libraries(forma_backend_rollback_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_backend_rollback
+        COMMAND forma_backend_rollback_test
+)
+
+# Rollback failure regression test
+add_executable(forma_backend_rollback_failure_test
+        tests/backend_rollback_failure_test.cpp
+)
+
+target_link_libraries(
+        forma_backend_rollback_failure_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_backend_rollback_failure
+        COMMAND forma_backend_rollback_failure_test
+)
+
+# Structured execution report tests
+add_executable(forma_execution_report_test
+        tests/execution_report_test.cpp
+)
+
+target_link_libraries(forma_execution_report_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_execution_report
+        COMMAND forma_execution_report_test
 )

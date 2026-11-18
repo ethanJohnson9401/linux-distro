@@ -37,6 +37,8 @@ add_library(forma_core STATIC
         src/action_executor.cpp
         src/memory_backend.cpp
         src/recovery_executor.cpp
+        src/system_inspector.cpp
+        src/system_inspector_formatter.cpp
 )
 
 target_include_directories(forma_core PUBLIC
@@ -456,4 +458,29 @@ target_link_libraries(forma_execution_report_test PRIVATE
 add_test(
         NAME forma_execution_report
         COMMAND forma_execution_report_test
+)
+
+# System inspection formatter test
+add_executable(forma_system_inspector_formatter_test
+        tests/system_inspector_formatter_test.cpp
+)
+
+target_link_libraries(
+        forma_system_inspector_formatter_test PRIVATE
+        forma_core
+)
+
+add_test(
+        NAME forma_system_inspector_formatter
+        COMMAND forma_system_inspector_formatter_test
+)
+
+# System inspection CLI integration test
+add_test(
+        NAME forma_inspect
+        COMMAND forma inspect
+)
+
+set_tests_properties(forma_inspect PROPERTIES
+        PASS_REGULAR_EXPRESSION "Read-only inspection"
 )
